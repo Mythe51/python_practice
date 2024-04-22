@@ -61,6 +61,7 @@ async def _(bot: Bot, ev: Event, matcher: Matcher):
     auth_sql = AuthSql()
     data = auth_sql.SelectTableByGroup(ev.get_session_id().split('_')[1])
 
+
     now = time.time()
     validate = data.deadline if data.deadline is not None else 0
 
