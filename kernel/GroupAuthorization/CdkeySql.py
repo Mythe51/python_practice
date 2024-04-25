@@ -47,7 +47,7 @@ class CdkeySql(BaseSql):
         '''
         self.ExecuteSingleSql(sql, (data.cdkey, createtime, validatetime, data.value, 'UNUSED'))     # 刚插入的时候使用状态肯定是未使用
 
-    def SelectCdkeyByCdkey(self, used: bool = None):
+    def SelectCdkey(self, used: bool = None):
         if used is not None and not isinstance(used, bool):
             raise TypeError("Invalid input. 'used' must be a boolean.")
 
@@ -67,12 +67,35 @@ class CdkeySql(BaseSql):
             cdkey_obj = CdkeyTable()
             cdkey_obj.cdkey = result[0]
             cdkey_obj.createtime = datetime.datetime.strptime(result[1], '%Y-%m-%d %H:%M:%S').timestamp()
-            cdkey_obj.validatetime = result[2]
+            cdkey_obj.validatetime = datetime.datetime.strptime(result[2], '%Y-%m-%d %H:%M:%S').timestamp()
             cdkey_obj.value = result[3]
             cdkey_obj.state = CdkeyState[result[4]].value
             cdkey_list.append(cdkey_obj)
 
         return cdkey_list
+
+    def SelectCdkeyByCdkey(self, cdkey):
+
+        sql = '''
+        SELECT * FROM cdkeys WHERE CDKEY = '
+        '''.strip()
+        sql += cdkey
+        sql += '\''
+
+        result = self.ExecuteSingleSql(sql)[1]
+
+        if len(result) == 0:
+            return None
+
+        result = result[0]
+        cdkey_obj = CdkeyTable()
+        cdkey_obj.cdkey = result[0]
+        cdkey_obj.createtime = datetime.datetime.strptime(result[1], '%Y-%m-%d %H:%M:%S').timestamp()
+        cdkey_obj.validatetime = datetime.datetime.strptime(result[2], '%Y-%m-%d %H:%M:%S').timestamp()
+        cdkey_obj.value = result[3]
+        cdkey_obj.state = CdkeyState[result[4]].value
+
+        return cdkey_obj
 
     def UpdateCdkeyState(self, cdkey: str, state: CdkeyState):
         if not all([cdkey, state]):
